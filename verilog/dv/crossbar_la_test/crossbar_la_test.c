@@ -43,24 +43,58 @@ void main(){
   reg_mprj_xfer = 1;
   while(reg_mprj_xfer == 1);
   
-  // x of Ax=b, 8-bits
-  reg_la0_oenb = reg_la0_iena = 0xFFFFFFFF;
-  // A of Ax=b, 8x8
-  reg_la1_oenb = reg_la0_iena = 0xFFFFFFFF;
-  reg_la2_oenb = reg_la0_iena = 0xFFFFFFFF;
-  // b of Ax=b, 8+-bits
+  /*
+   * bitmap: 
+   * la0
+   * 0:7 : x
+   *
+   * la1
+   * 0:7  : write row (one hot encoded)
+   * 8:15 : write data
+   * 16:16: write enable
+   * 17:17: write done
+   *
+   * la3
+   * 96:127 : b
+   */
+  // x stuff
+  reg_la0_oenb = reg_la0_iena = 0x000000FF;
+
+  // A stuff
+  reg_la1_oenb = reg_la0_iena = 0x0001FFFF;
+
+  // doesn't matter
+  reg_la2_oenb = reg_la0_iena = 0x00000000;
+
+  // b stuff
   reg_la3_oenb = reg_la3_iena = 0x00000000;
 
-  // Start assigning values
-  // x = [1, 0, 1, 1, 0, 1, 0, 1]
-  reg_la0_data = 0b10110101;
-  // A = I
-  reg_la1_data = 0x80402010;
-  reg_la2_data = 0x08040201;
-  // print result 
-  printf("%d", reg_la3_data);
+  // Write identity matrix weights
+  for(int i = 0; i < 8; i++){
+    // set write row
+    reg_la1_data &= 0xFFFFFF00;
+    reg_la1_data |= (1 << (8-i));
 
-  
+    // set write data
+    reg_la1_data &= 0xFFFF00FF;
+    reg_la1_data |= (1 << (i + 8));
+
+    // start write
+    reg_la1_data |= 0x00010000;
+    // wait for write to complete
+   
+    // clear just the 16th bit
+    reg_la1_data &= 0xFFFEFFFF;
+  }
+
+  // assign x val
+  reg_la0_data |= 0b10110101;
+  // printf("%d", reg_la3_data);
+
+  reg_la0_data |= 0b10100010;
+  // printf("%d", reg_la3_data);
+
+  reg_la0_data |= 0b11110100;
+  // printf("%d", reg_la3_data);
 
 }
-

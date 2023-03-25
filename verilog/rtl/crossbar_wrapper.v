@@ -144,21 +144,25 @@ module crossbar_wrapper (
 
 
     // LA 
-    // 0-31 input, 32-63 output (to the crossbar)
-    // Assuming la_oenb will be :
-    // 0x00000000_FFFFFFFF_FFFFFFFF_FFFFFFFF
-    assign la_data_out[127:64] = {64{1'b0}};
+    assign la_data_out[95:64] = {64{1'b0}};
     assign la_data_out[31:0] = {32{1'b0}};
 
-    // weights
-    wire [63:0] crossbar_A = la_data_in[95:32];
-    // vector
-    wire [31:0] crossbar_x = la_data_in[31:0];
-    // result
-    wire [31:0] crossbar_b = la_data_out[127:96];
+    
+    // A stuff
+    wire [7:0] A_row = la_data_in[39:32];
+    wire [7:0] A_data = la_data_in[47:40];
+    wire A_wenable = la_data_in[48];
+    wire A_wdone;
+    assign la_data_out[49] = A_wdone;
+  
 
+    // x stuff
+    wire [7:0] x = la_data_in[7:0];
+    // output stuff
+    wire [7:0] b;
+    assign la_data_out[103:96] = b;
     // Instantiate the top level of the crossbar with necessary signals
-    crossbar_top(
+    crossbar_top top (
       `ifdef USE_POWER_PINS
         .vdda1(vdda1),
         .vdda2(vdda2),
@@ -169,11 +173,14 @@ module crossbar_wrapper (
         .vssd1(vssd1),
         .vssd2(vssd2),
       `endif
-      .A(crossbar_A),
-      .x(crossbar_x),
-      .b(crossbar_b)
-    )
+      .clk(wb_clk_i),
+      .A_row(A_row),
+      .A_data(A_data),
+      .A_wenable(A_wenable),
+      .A_wdone(A_wdone),
+      .x(x),
+      .b(b)
+    );
 
 endmodule
 
-`default_nettype wire
