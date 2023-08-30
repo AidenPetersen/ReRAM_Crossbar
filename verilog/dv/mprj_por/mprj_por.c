@@ -14,13 +14,15 @@
  * limitations under the License.
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <defs.h>
+
+// This include is relative to $CARAVEL_PATH (see Makefile)
+#include "verilog/dv/caravel/defs.h"
 
 // --------------------------------------------------------
 
 void main()
 {
-    // reg_spimaster_config = 0xa002;	// Enable, prescaler = 2
+    reg_spimaster_config = 0xa002;	// Enable, prescaler = 2
 
     reg_mprj_datal = 0x00000000;
     reg_mprj_datah = 0x00000000;

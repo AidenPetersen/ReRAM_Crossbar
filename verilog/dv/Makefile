@@ -19,11 +19,9 @@
 .SUFFIXES:
 .SILENT: clean all
 
-
-PATTERNS = mprj_por crossbar_la_test
+PATTERNS = mprj_por
 
 all:  ${PATTERNS}
-
 	for i in ${PATTERNS}; do \
 		( cd $$i && make -f Makefile $${i}.vcd &> verify.log && grep Monitor verify.log) ; \
 	done
@@ -34,7 +32,7 @@ $(DV_PATTERNS): verify-% :
 
 clean:  ${PATTERNS}
 	for i in ${PATTERNS}; do \
-		( cd $$i && \rm  -f *.elf *.hex *.bin *.vvp *.log *.vcd *.lst *.hexe ) ; \
+		( cd $$i && make clean ) ; \
 	done
 	rm -rf *.log
 	
