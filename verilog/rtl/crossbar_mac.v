@@ -13,68 +13,47 @@ module crossbar_mac (
    // for simulation purposes
    input clk,
 
-   input  [7:0] A_row,
-   input  [7:0] A_data,
-   input  A_wenable,
-   output A_wdone,
-
-   input  [7:0] x,
-   
-   output [7:0] b
+   input  [7:0] bitline,
+   input  [7:0] wordline,
+   input  [7:0] selectline,
+   input  wenable,
+   input  form,
+   input  mac,
+   output [7:0] out
 
 );
-  reg A_wdone_reg = 0;
   assign A_wdone = A_wdone_reg;
 
-  reg [7:0] A [7:0];
-  wire [7:0]A0,A1,A2,A3,A4,A5,A6,A7;
-  assign A0 = A[0];
-  assign A1 = A[1];
-  assign A2 = A[2];
-  assign A3 = A[3];
-  assign A4 = A[4];
-  assign A5 = A[5];
-  assign A6 = A[6];
-  assign A7 = A[7];
+  reg [7:0] internal [7:0];
+  reg [7:0] out_mtx  [7:0];
+  wire [7:0] out_sum [3:0];
 
-  wire [2:0] A_row_enc;
-  // encoder
-  assign A_row_enc[2] = A_row[4] | A_row[5] | A_row[6] | A_row[7];
-  assign A_row_enc[1] = A_row[2] | A_row[3] | A_row[6] | A_row[7];
-  assign A_row_enc[0] = A_row[1] | A_row[3] | A_row[5] | A_row[7];
-
-  // done tracking, weird sensitivities, it should be fine
+  integer i, j;
   always @(posedge clk) begin
-    if (A_wenable && ~A_wdone_reg) begin
-      A[A_row_enc] = A_data;
-      A_wdone_reg = 1'b1;
-    end else if (~A_wenable && A_wdone_reg) begin
-      A_wdone_reg = 1'b0;    
+    for (i = 0; i < 8; i = i + 1) begin
+      for (j = 0; j < 8; j = j + 1) begin
+        // Set/form 
+        if(bitline[j] == 1 && wordline[i] == 1 && selectline[j] == 0)
+          internal[i][j] <= 1;
+          out_mtx[i][j] <= 0;
+        // Reset
+        else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 1)
+          internal[i][j] <= 0;
+          out_mtx[i][j] <= 0;
+        // Read/MAC
+        else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 0)
+          internal[i][j] <= internal[i][j];
+          out_mtx[i][j] <= internal[i][j];
+        // do nothing
+        else 
+          internal[i][j] <= internal[i][j];
+          out_mtx[i][j] <= 0;
+      end
     end
   end
-
-  wire [15:0] mult_arr [7:0];
-
-  
-  wire [15:0] add1 [3:0];
-  wire [15:0] add2 [1:0];
-  wire [15:0] result;
-  genvar i;
-  genvar j;
+  // Or because 1-bit dac
   genvar k;
-  // multiplication
-  generate
-    for(i = 0; i < 8; i = i + 1) begin
-      assign mult_arr[i] = x * A[i];
-    end
-    for(j = 0; j < 4; j = j + 1) begin
-      assign add1[j] = mult_arr[2 * j] + mult_arr[2 * j + 1];
-    end
-    for(k = 0; k < 2; k = k + 1) begin
-      assign add2[k] = add1[2 * k] + add1[2 * k + 1];
-    end
-  endgenerate
-
-  assign result = add2[0] + add2[1];
-  assign b = result[7:0];
+  for (k = 0; k < 8; k = k + 1)
+    assign out[k] = |out_mtx[k];
+  end
 endmodule

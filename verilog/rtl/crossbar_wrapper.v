@@ -148,19 +148,16 @@ module crossbar_wrapper (
     assign la_data_out[31:0] = {32{1'b0}};
 
     
-    // A stuff
-    wire [7:0] A_row = la_data_in[39:32];
-    wire [7:0] A_data = la_data_in[47:40];
-    wire A_wenable = la_data_in[48];
-    wire A_wdone;
-    assign la_data_out[49] = A_wdone;
-  
+    // inputs
+    wire [7:0] bitline = la_data_in[0:7];
+    wire [7:0] selectline = la_data_in[8:15]
+    wire [7:0] wordline = la_data_in[23:16];
+    wire mac = la_data_in[24];
+    wire form = la_data_in[25];
+    wire wenable = la_data_in[26];
 
-    // x stuff
-    wire [7:0] x = la_data_in[7:0];
-    // output stuff
-    wire [7:0] b;
-    assign la_data_out[103:96] = b;
+    wire [7:0] out;
+    assign la_data_out[37:32] = out;
     // Instantiate the top level of the crossbar with necessary signals
     crossbar_top top (
       `ifdef USE_POWER_PINS
@@ -174,12 +171,13 @@ module crossbar_wrapper (
         .vssd2(vssd2),
       `endif
       .clk(wb_clk_i),
-      .A_row(A_row),
-      .A_data(A_data),
-      .A_wenable(A_wenable),
-      .A_wdone(A_wdone),
-      .x(x),
-      .b(b)
+      .bitline(bitline),
+      .selectline(selectline),
+      .wordline(wordline),
+      .wenable(wenable),
+      .form(form),
+      .mac(mac),
+      .out(out)
     );
 
 endmodule
