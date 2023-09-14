@@ -53,7 +53,19 @@ module crossbar_mac (
   end
   // Or because 1-bit dac
   genvar k;
-  for (k = 0; k < 8; k = k + 1)
-    assign out[k] = |out_mtx[k];
+  genvar l;
+  for (k = 0; k < 8; k = k + 1) begin
+    for(l = 0; l < 8; l = l + 1) begin
+      assign out_sum[k] = out_sum[k] + {0'b000, out_mtx[k][l]};
+    end
   end
+
+  genvar m;
+  for (m = 0; m < 8; m = m + 1) begin
+    if (out_sum[m] < 4'h4) 
+      assign out[m] = 1'b0;
+    else
+      assign out[m] = 1'b1;
+  end
+
 endmodule
