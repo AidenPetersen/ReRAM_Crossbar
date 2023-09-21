@@ -11,7 +11,7 @@ void write(uint8_t value, uint8_t line){
   uint32_t selectline = (~value) << 8;
   // la[23:16]
   uint32_t wordline   = (1 << line) << 16;
-  op = bitline | selectline | line_onehot;
+  op = bitline | selectline | wordline;
   reg_la0_data = op;
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
