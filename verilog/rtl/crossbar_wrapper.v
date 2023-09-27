@@ -144,13 +144,12 @@ module crossbar_wrapper (
 
 
     // LA 
-    assign la_data_out[95:64] = {64{1'b0}};
     assign la_data_out[31:0] = {32{1'b0}};
 
     
     // inputs
-    wire [7:0] bitline = la_data_in[0:7];
-    wire [7:0] selectline = la_data_in[8:15]
+    wire [7:0] bitline = la_data_in[7:0];
+    wire [7:0] selectline = la_data_in[15:8]
     wire [7:0] wordline = la_data_in[23:16];
     wire mac = la_data_in[24];
     wire form = la_data_in[25];

@@ -34,9 +34,9 @@ uint8_t read(uint8_t line){
 
 uint8_t mac(uint8_t value){
   uint32_t op;
-  uint32_t selectline = value;
-  uint32_t bitline    = (~value) << 8;
-  uint32_t wordline   = (0xFF) << 16;
+  uint32_t selectline = 0;
+  uint32_t bitline    = 0;
+  uint32_t wordline   = (value) << 16;
 
   op = selectline | bitline | wordline;
   reg_la0_data = op;

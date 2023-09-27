@@ -26,7 +26,8 @@ module crossbar_mac (
 
   reg [7:0] internal [7:0];
   reg [7:0] out_mtx  [7:0];
-  wire [7:0] out_sum [3:0];
+  wire [7:0] out_sum [7:0][4:0];
+  wire [7:0]
 
   integer i, j;
   always @(posedge clk) begin
@@ -52,20 +53,23 @@ module crossbar_mac (
     end
   end
   // Or because 1-bit dac
-  genvar k;
-  genvar l;
+
+
+  genvar k, l;
+  assign out_sum[0] = out_mtx[0]
   for (k = 0; k < 8; k = k + 1) begin
-    for(l = 0; l < 8; l = l + 1) begin
-      assign out_sum[k] = out_sum[k] + {0'b000, out_mtx[k][l]};
+    for (l = 1; l < 4; l = l + 1) begin
+      assign out_sum[l][k] = out_sum[l - 1][k] + out_mtx[l][k]
     end
+    assign out[k] = |out_mtx[k];
   end
+  assign out = out_sum[7];
 
   genvar m;
   for (m = 0; m < 8; m = m + 1) begin
-    if (out_sum[m] < 4'h4) 
+    if (out_sum[7][m] < 4'h4) 
       assign out[m] = 1'b0;
     else
       assign out[m] = 1'b1;
   end
-
 endmodule
