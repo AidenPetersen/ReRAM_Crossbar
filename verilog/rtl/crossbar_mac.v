@@ -62,7 +62,6 @@ module crossbar_mac (
       assign out_sum[l][k] = out_sum[l - 1][k] + {3'b000, out_mtx[l][k]};
     end
   end
-  assign out = out_sum[7];
 
   genvar m;
   for (m = 0; m < 8; m = m + 1) begin
