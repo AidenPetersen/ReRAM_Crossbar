@@ -61,7 +61,6 @@ module crossbar_mac (
     for (l = 1; l < 4; l = l + 1) begin
       assign out_sum[l][k] = out_sum[l - 1][k] + {3'b000, out_mtx[l][k]};
     end
-    assign out[k] = |out_mtx[k];
   end
   assign out = out_sum[7];
 
