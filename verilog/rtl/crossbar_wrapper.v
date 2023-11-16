@@ -73,8 +73,10 @@
  *----------------------------------------------------------------
  */
 
-module crossbar_wrapper (
-`ifdef USE_POWER_PINS
+module crossbar_wrapper #(
+    parameter BITS = 16
+)(
+  `ifdef USE_POWER_PINS
     inout vdda1,	// User area 1 3.3V supply
     inout vdda2,	// User area 2 3.3V supply
     inout vssa1,	// User area 1 analog ground
@@ -83,7 +85,7 @@ module crossbar_wrapper (
     inout vccd2,	// User area 2 1.8v supply
     inout vssd1,	// User area 1 digital ground
     inout vssd2,	// User area 2 digital ground
-`endif
+  `endif
 
     // Wishbone Slave ports (WB MI A)
     input wb_clk_i,
@@ -102,24 +104,10 @@ module crossbar_wrapper (
     output [127:0] la_data_out,
     input  [127:0] la_oenb,
 
-
     // IOs
-    input  [`MPRJ_IO_PADS-`ANALOG_PADS-1:0] io_in,
-    input  [`MPRJ_IO_PADS-`ANALOG_PADS-1:0] io_in_3v3,
-    output [`MPRJ_IO_PADS-`ANALOG_PADS-1:0] io_out,
-    output [`MPRJ_IO_PADS-`ANALOG_PADS-1:0] io_oeb,
-
-    // GPIO-analog
-    inout [`MPRJ_IO_PADS-`ANALOG_PADS-10:0] gpio_analog,
-    inout [`MPRJ_IO_PADS-`ANALOG_PADS-10:0] gpio_noesd,
-
-    // Dedicated analog
-    inout [`ANALOG_PADS-1:0] io_analog,
-    inout [2:0] io_clamp_high,
-    inout [2:0] io_clamp_low,
-
-    // Clock
-    input   user_clock2,
+    input  [BITS-1:0] io_in,
+    output [BITS-1:0] io_out,
+    output [BITS-1:0] io_oeb,
 
     // IRQ
     output [2:0] irq
@@ -149,12 +137,15 @@ module crossbar_wrapper (
     
     // inputs
     wire [7:0] bitline = la_data_in[7:0];
-    wire [7:0] selectline = la_data_in[15:8]
+    wire [7:0] selectline = la_data_in[15:8];
     wire [7:0] wordline = la_data_in[23:16];
+    
     wire mac = la_data_in[24];
     wire form = la_data_in[25];
-    wire wenable = la_data_in[26];
-
+    wire write = la_data_in[26];
+    wire read = la_data_in[27];
+    wire write_or_form = la_data_in[28];
+    
     wire [7:0] out;
     assign la_data_out[37:32] = out;
     // Instantiate the top level of the crossbar with necessary signals

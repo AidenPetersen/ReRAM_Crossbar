@@ -105,7 +105,7 @@ module crossbar_la_test_tb;
     wire VDD1V8 = power2;
     wire VSS = 1'b0;
 
-    caravan uut (
+    caravel uut (
         .vddio	  (VDD3V3),
         .vssio	  (VSS),
         .vdda	  (VDD3V3),

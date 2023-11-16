@@ -19,55 +19,69 @@ module crossbar_mac (
    input  wenable,
    input  form,
    input  mac,
-   output [7:0] out
+   output [7:0] out,
+   output [3:0] o0,
+   output [3:0] o1,
+   output [3:0] o2,
+   output [3:0] o3,
+   output [3:0] o4,
+   output [3:0] o5,
+   output [3:0] o6,
+   output [3:0] o7
 
 );
-  assign A_wdone = A_wdone_reg;
 
   reg [7:0] internal [7:0];
   reg [7:0] out_mtx  [7:0];
-  wire [7:0] out_sum [7:0][4:0];
-  wire [7:0]
+  wire [4:0] out_sum [7:0][7:0];
+  assign o0 = out_sum[0][0];
+  assign o1 = out_sum[0][1];
+  assign o2 = out_sum[0][2];
+  assign o3 = out_sum[0][3];
+  assign o4 = out_sum[0][4];
+  assign o5 = out_sum[0][5];
+  assign o6 = out_sum[0][6];
+  assign o7 = out_sum[0][7];
 
-  integer i, j;
+  integer i,j;
   always @(posedge clk) begin
     for (i = 0; i < 8; i = i + 1) begin
       for (j = 0; j < 8; j = j + 1) begin
         // Set/form 
-        if(bitline[j] == 1 && wordline[i] == 1 && selectline[j] == 0)
+        if(bitline[j] == 1 && wordline[i] == 1 && selectline[j] == 0) begin
           internal[i][j] <= 1;
           out_mtx[i][j] <= 0;
         // Reset
-        else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 1)
+        end else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 1) begin
           internal[i][j] <= 0;
           out_mtx[i][j] <= 0;
         // Read/MAC
-        else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 0)
+        end else if(bitline[j] == 0 && wordline[i] == 1 && selectline[j] == 0) begin
           internal[i][j] <= internal[i][j];
           out_mtx[i][j] <= internal[i][j];
+        
         // do nothing
-        else 
+        end else begin
           internal[i][j] <= internal[i][j];
           out_mtx[i][j] <= 0;
+        end
       end
     end
   end
-  // Or because 1-bit dac
 
 
   genvar k, l;
-  assign out_sum[0] = out_mtx[0]
   for (k = 0; k < 8; k = k + 1) begin
-    for (l = 1; l < 4; l = l + 1) begin
+    assign out_sum[0][k] = {3'b000, out_mtx[0][k]};
+  end
+  for (k = 0; k < 8; k = k + 1) begin
+    for (l = 1; l < 8; l = l + 1) begin
       assign out_sum[l][k] = out_sum[l - 1][k] + {3'b000, out_mtx[l][k]};
     end
   end
-
+  
   genvar m;
   for (m = 0; m < 8; m = m + 1) begin
-    if (out_sum[7][m] < 4'h4) 
-      assign out[m] = 1'b0;
-    else
-      assign out[m] = 1'b1;
+    assign out[m] = out_sum[7][m] < 4'b0100 ? 1'b0 : 1'b1;
   end
 endmodule

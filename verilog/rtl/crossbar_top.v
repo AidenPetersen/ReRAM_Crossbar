@@ -20,10 +20,9 @@ module crossbar_top (
   input  [7:0] selectline,
   input  wenable,
   input  form,
-  input  mac
-  output out,
+  input  mac,
 
-  input  [7: 0] x,
+  input  [7:0] x,
   
   output [7:0] out
 );
@@ -31,7 +30,6 @@ module crossbar_top (
   wire [7:0] wordline_dac;
   wire [7:0] selectline_dac;
   wire write;
-  wire [7:0] ;
 
   // ============================
   //     Declare DAC blocks
@@ -91,7 +89,7 @@ module crossbar_top (
   // ============================
   // Declare MAC Unit (crossbar)
   // ============================
-  crossbar_mac mac (
+  crossbar_mac macunit (
     .clk(clk),
     .wordline(wordline_dac),
     .selectline(selectline_dac),

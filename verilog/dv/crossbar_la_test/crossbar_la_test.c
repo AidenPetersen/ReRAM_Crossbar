@@ -1,5 +1,6 @@
-#include "verilog/dv/caravel/defs.h"
-// #include <stub.c>
+#include <defs.h>
+#include <stub.c>
+
 #define WAIT_ITERATIONS 10
 
 
@@ -8,10 +9,11 @@ void write(uint8_t value, uint8_t line){
   // la[ 7: 0]
   uint32_t bitline    = value;
   // la[15: 8]
-  uint32_t selectline = (~value) << 8;
+  uint32_t selectline = (0xFF ^ (value)) << 8;
   // la[23:16]
   uint32_t wordline   = (1 << line) << 16;
-  op = bitline | selectline | wordline;
+  unit32_t write_control = (0b101) << 26;
+  op = bitline | selectline | wordline | write_control;
   reg_la0_data = op;
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
@@ -22,7 +24,8 @@ void write(uint8_t value, uint8_t line){
 uint8_t read(uint8_t line){
   uint32_t op;
   uint32_t wordline = (1 << line) << 16;
-  op = wordline;
+  uint32_t read_control = 1 << 27;
+  op = wordline | read_control;
   reg_la0_data = op;
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
@@ -37,14 +40,25 @@ uint8_t mac(uint8_t value){
   uint32_t selectline = 0;
   uint32_t bitline    = 0;
   uint32_t wordline   = (value) << 16;
-
-  op = selectline | bitline | wordline;
+  uint32_t mac_control = 1 << 24;
+  op = selectline | bitline | wordline | mac_control;
   reg_la0_data = op;
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
   }
   uint8_t result = (uint8_t) reg_la1_data;
   reg_la0_data = 0;
+  return result;
+}
+
+void form(){
+  uint32_t op;
+  uint32_t selectline = 0;
+  uint32_t bitline    = 0xFF;
+  uint32_t wordline   = 0xFF << 8;
+  uint32_t form_control = (0b1001) << 25;
+  op = selectline | bitline | wordline | form_control;
+  reg_la0_data = op;
   return result;
 }
 
@@ -117,17 +131,17 @@ void main(){
   reg_la3_oenb = reg_la3_iena = 0x00000000;
 
   // Write identity matrix
+  write(0x01, 0);
   write(0x01, 1);
-  write(0x02, 2);
-  write(0x04, 3);
-  write(0x08, 4);
-  write(0x10, 5);
-  write(0x20, 6);
-  write(0x40, 7);
-  write(0x80, 8);
+  write(0x01, 2);
+  write(0x01, 3);
+  write(0x01, 4);
+  write(0x01, 5);
+  write(0x01, 6);
+  write(0x01, 7);
 
   int r = read(3);
 
-  int m = mac(0xA5);
+  int m = mac(0xFF);
 
 }

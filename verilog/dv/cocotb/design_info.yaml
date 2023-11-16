@@ -1,0 +1,9 @@
+CARAVEL_ROOT: /home/aidenp/Projects/caravel_user_project/caravel
+MCW_ROOT: /home/aidenp/Projects/caravel_user_project/mgmt_core_wrapper
+PDK: sky130B
+PDK_ROOT: /home/aidenp/Projects/caravel_user_project/dependencies/pdks
+USER_PROJECT_ROOT: /home/aidenp/Projects/caravel_user_project
+caravan: false
+clk: 25
+emailto:
+- null
