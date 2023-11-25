@@ -12,9 +12,12 @@ void write(uint8_t value, uint8_t line){
   uint32_t selectline = (0xFF ^ (value)) << 8;
   // la[23:16]
   uint32_t wordline   = (1 << line) << 16;
-  unit32_t write_control = (0b101) << 26;
+  uint32_t write_control = (0b11) << 24;
+
   op = bitline | selectline | wordline | write_control;
   reg_la0_data = op;
+  reg_la2_data = op << 19;
+  reg_la3_data = op >> 13;
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
   }
@@ -24,9 +27,11 @@ void write(uint8_t value, uint8_t line){
 uint8_t read(uint8_t line){
   uint32_t op;
   uint32_t wordline = (1 << line) << 16;
-  uint32_t read_control = 1 << 27;
-  op = wordline | read_control;
+  op = wordline;
   reg_la0_data = op;
+  reg_la2_data = op << 19;
+  reg_la3_data = op >> 13;
+
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
   }
@@ -40,9 +45,11 @@ uint8_t mac(uint8_t value){
   uint32_t selectline = 0;
   uint32_t bitline    = 0;
   uint32_t wordline   = (value) << 16;
-  uint32_t mac_control = 1 << 24;
-  op = selectline | bitline | wordline | mac_control;
+  op = selectline | bitline | wordline;
   reg_la0_data = op;
+  reg_la2_data = op << 19;
+  reg_la3_data = op >> 13;
+
   for(int i = 0; i < WAIT_ITERATIONS; i++){
     __asm("nop");
   }
@@ -56,9 +63,13 @@ void form(){
   uint32_t selectline = 0;
   uint32_t bitline    = 0xFF;
   uint32_t wordline   = 0xFF << 8;
-  uint32_t form_control = (0b1001) << 25;
+  uint32_t form_control = (0b10) << 24;
   op = selectline | bitline | wordline | form_control;
   reg_la0_data = op;
+  reg_la2_data = op << 19;
+  reg_la3_data = op >> 13;
+
+  uint8_t result = (uint8_t) reg_la1_data;
   return result;
 }
 
